@@ -1,0 +1,13 @@
+/**
+ * CloudPress CMS — index.js
+ * WordPress index.php 를 대체하는 Cloudflare Pages/Worker 진입점
+ *
+ * 역할:
+ *   - 요청을 cp-blog-header.js 로 라우팅
+ *   - 테마 템플릿 로더 실행
+ *   - D1(DB) + KV(CACHE/SESSIONS) 기반
+ *
+ * @package CloudPress
+ */
+
+export { default } from './cp-blog-header.js';
