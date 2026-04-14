@@ -1,0 +1,63 @@
+# CloudPress CMS — wrangler.toml
+# WordPress wp-config.php + server config 대체
+#
+# 배포:
+#   wrangler pages deploy . --project-name=cloudpress
+#   또는 GitHub 연동 자동 배포
+#
+# Secrets 설정:
+#   wrangler secret put CF_API_TOKEN
+#   wrangler secret put CF_ACCOUNT_ID
+#   wrangler secret put CP_AUTH_KEY
+
+name                  = "cloudpress"
+compatibility_date    = "2024-09-23"
+compatibility_flags   = ["nodejs_compat"]
+
+# ── 메인 D1 Database (사용자/사이트/콘텐츠 저장) ──────────────────
+# MariaDB/MySQL 완전 대체 — D1(SQLite on Cloudflare)
+[[d1_databases]]
+binding       = "DB"
+database_name = "cloudpress-db"
+database_id   = "REPLACE_WITH_YOUR_D1_ID"
+
+# ── KV: 세션 토큰 (7일 TTL) ───────────────────────────────────────
+[[kv_namespaces]]
+binding = "SESSIONS"
+id      = "REPLACE_WITH_YOUR_SESSIONS_KV_ID"
+
+# ── KV: 설정·페이지·테마 캐시 ────────────────────────────────────
+[[kv_namespaces]]
+binding = "CACHE"
+id      = "REPLACE_WITH_YOUR_CACHE_KV_ID"
+
+# ── Cron Triggers (wp-cron.php 대체) ──────────────────────────────
+[triggers]
+crons = ["* * * * *"]   # 1분마다 — 예약 발행, 세션 정리 등
+
+# ── 환경 변수 (민감 값은 반드시 wrangler secret put 사용) ─────────
+[vars]
+# 사이트 기본 정보 (초기값 — 어드민 패널에서 변경 가능)
+SITE_NAME   = "CloudPress"
+SITE_DOMAIN = "example.com"
+
+# Cloudflare 계정 (사이트별 D1/KV/DNS 자동화에 필요)
+# wrangler secret put CF_API_TOKEN
+# wrangler secret put CF_ACCOUNT_ID
+CF_API_TOKEN  = ""
+CF_ACCOUNT_ID = ""
+
+# CP 인증 키 (세션 서명용)
+# wrangler secret put CP_AUTH_KEY
+CP_AUTH_KEY = ""
+
+# 디버그 모드 ("true" / "false")
+CP_DEBUG = "false"
+
+# D1 테이블 접두사 (기본 cp_ — 변경 시 schema.sql도 수정)
+TABLE_PREFIX = "cp_"
+
+# ── 개발 서버 ─────────────────────────────────────────────────────
+[dev]
+port           = 8788
+local_protocol = "http"
